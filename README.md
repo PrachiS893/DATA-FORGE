@@ -1,12 +1,10 @@
-# DataForge Backend Agent — BE-1 Scaffold
+# DataForge Backend Agent
 
 This repository contains the LiveKit Python Agent for DataForge voice assistant.
 
-## BE-1 Features
-- Scaffolded LiveKit agent process using `livekit-agents` worker architecture.
-- Joins LiveKit room dynamically on job context creation.
-- Subscribes to user audio tracks (`AutoSubscribe.AUDIO_ONLY`).
-- Listens to participant connection and track subscription events with structured logging.
+## Features
+- **BE-1 Scaffold**: LiveKit agent worker joining rooms and subscribing to audio tracks (`AutoSubscribe.AUDIO_ONLY`).
+- **BE-2 STT Integration**: Streaming Deepgram STT plugin (`livekit-plugins-deepgram`). Receives raw audio frames from participant tracks and prints live final transcripts formatted as `[<participant_identity>]: <text>`.
 
 ## Setup Instructions
 
@@ -23,11 +21,12 @@ This repository contains the LiveKit Python Agent for DataForge voice assistant.
    ```
 
 2. **Configure Environment Variables**
-   Copy `.env.example` to `.env` and set your LiveKit credentials:
+   Ensure `.env` contains your LiveKit credentials and Deepgram API key:
    ```bash
    LIVEKIT_URL=wss://<your-livekit-server-domain>.livekit.cloud
    LIVEKIT_API_KEY=<your_api_key>
    LIVEKIT_API_SECRET=<your_api_secret>
+   DEEPGRAM_API_KEY=<your_deepgram_api_key>
    ```
 
 3. **Run Agent Worker**
