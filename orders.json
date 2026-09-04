@@ -1,0 +1,92 @@
+{
+  "1023": {
+    "order_id": "1023",
+    "customer_name": "Aditi Sharma",
+    "status": "shipped",
+    "eta": "2026-09-06",
+    "shipping_address": "12 MG Road, Ranchi, Jharkhand",
+    "total": "₹2,499",
+    "items": ["Wireless Earbuds", "Phone Case"]
+  },
+  "4521": {
+    "order_id": "4521",
+    "customer_name": "Rohan Verma",
+    "status": "processing",
+    "eta": "2026-09-09",
+    "shipping_address": "45 Park Street, Kolkata, West Bengal",
+    "total": "₹6,150",
+    "items": ["Bluetooth Speaker"]
+  },
+  "7788": {
+    "order_id": "7788",
+    "customer_name": "Neha Kulkarni",
+    "status": "delivered",
+    "eta": "2026-08-30",
+    "shipping_address": "88 FC Road, Pune, Maharashtra",
+    "total": "₹1,020",
+    "items": ["Notebook Set", "Pen Drive 64GB"]
+  },
+  "9981": {
+    "order_id": "9981",
+    "customer_name": "Farhan Ali",
+    "status": "delayed",
+    "eta": "2026-09-12",
+    "shipping_address": "3 Residency Road, Lucknow, Uttar Pradesh",
+    "total": "₹3,899",
+    "items": ["Air Fryer"]
+  },
+  "5544": {
+    "order_id": "5544",
+    "customer_name": "Priya Nair",
+    "status": "shipped",
+    "eta": "2026-09-05",
+    "shipping_address": "21 Marine Drive, Kochi, Kerala",
+    "total": "₹899",
+    "items": ["Yoga Mat"]
+  },
+  "3312": {
+    "order_id": "3312",
+    "customer_name": "Vikram Singh",
+    "status": "processing",
+    "eta": "2026-09-10",
+    "shipping_address": "56 Civil Lines, Jaipur, Rajasthan",
+    "total": "₹12,499",
+    "items": ["Office Chair"]
+  },
+  "6690": {
+    "order_id": "6690",
+    "customer_name": "Sneha Reddy",
+    "status": "delivered",
+    "eta": "2026-08-28",
+    "shipping_address": "9 Banjara Hills, Hyderabad, Telangana",
+    "total": "₹549",
+    "items": ["Kitchen Towels"]
+  },
+  "8823": {
+    "order_id": "8823",
+    "customer_name": "Karan Mehta",
+    "status": "delayed",
+    "eta": "2026-09-14",
+    "shipping_address": "17 CG Road, Ahmedabad, Gujarat",
+    "total": "₹4,750",
+    "items": ["Table Lamp", "Extension Cord"]
+  },
+  "2210": {
+    "order_id": "2210",
+    "customer_name": "Ananya Das",
+    "status": "shipped",
+    "eta": "2026-09-07",
+    "shipping_address": "5 Salt Lake, Kolkata, West Bengal",
+    "total": "₹1,899",
+    "items": ["Backpack"]
+  },
+  "4477": {
+    "order_id": "4477",
+    "customer_name": "Imran Khan",
+    "status": "processing",
+    "eta": "2026-09-11",
+    "shipping_address": "30 Sector 15, Chandigarh",
+    "total": "₹7,299",
+    "items": ["Mechanical Keyboard"]
+  }
+}

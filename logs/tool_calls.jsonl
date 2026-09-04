@@ -1,0 +1,6 @@
+{"event": "issued", "call_id": "a33cf4ef", "generation_id": 0, "order_id": "1023", "delay_ms": 6000, "ts": 1788519136.094459}
+{"event": "completed", "call_id": "a33cf4ef", "generation_id": 0, "order_id": "1023", "ts": 1788519142.1058702}
+{"event": "issued", "call_id": "7b70c392", "generation_id": 0, "order_id": "1023", "delay_ms": 6000, "ts": 1788519717.0439851}
+{"event": "completed", "call_id": "7b70c392", "generation_id": 0, "order_id": "1023", "ts": 1788519723.0898442}
+{"event": "issued", "call_id": "5162689c", "generation_id": 0, "order_id": "4521", "delay_ms": 6000, "ts": 1788520074.2638335}
+{"event": "completed", "call_id": "5162689c", "generation_id": 0, "order_id": "4521", "ts": 1788520080.2897716}
