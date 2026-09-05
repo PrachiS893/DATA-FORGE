@@ -30,24 +30,39 @@ logger = logging.getLogger("backend-agent")
 # Shared logger instance for backend tool calls
 tool_logger = ToolCallLogger()
 
+# Global generation counter, bumped on every committed user instruction
+current_generation: int = 0
+
 
 @llm.function_tool(
     description="Look up order details (status, ETA, items, total, shipping address) by numeric order ID (e.g. '1023', '4521')."
 )
 async def lookup_order_tool(order_id: str) -> dict:
     """Async wrapper around the blocking lookup_order function from tool.py."""
-    logger.info(f"[TOOL CALL] Triggered lookup_order_tool for order_id: '{order_id}'")
+    global current_generation
+    captured_gen = current_generation
+    logger.info(f"[TOOL CALL] Triggered lookup_order_tool for order_id: '{order_id}' (captured_gen={captured_gen})")
     cancel_token = CancelToken()
-    generation_id = 0
 
     # Run blocking synchronous lookup_order in background thread to avoid freezing event loop
     result = await asyncio.to_thread(
         lookup_order,
         order_id=order_id,
-        generation_id=generation_id,
+        generation_id=captured_gen,
         cancel_token=cancel_token,
         logger=tool_logger,
     )
+
+    # Stale-result fencing check: compare captured generation against current generation
+    if captured_gen != current_generation:
+        logger.info(
+            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation}"
+        )
+        print(
+            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation}",
+            flush=True,
+        )
+        return {"stale": True, "order_id": order_id}
 
     logger.info(f"[TOOL RESULT] order_id={order_id} | status={result.status} | data={result.data}")
     print(f"[TOOL RESULT] order_id={order_id} | status={result.status} | data={result.data}", flush=True)
@@ -57,6 +72,7 @@ async def lookup_order_tool(order_id: str) -> dict:
         "order_id": result.order_id,
         "data": result.data,
     }
+
 
 
 async def entrypoint(ctx: JobContext):
@@ -103,7 +119,8 @@ async def entrypoint(ctx: JobContext):
         instructions=(
             "You are an order tracking assistant for DataForge. "
             "When a user asks about an order or provides an order ID, call the tool lookup_order_tool with the order ID. "
-            "Provide concise order status information based on the tool result."
+            "Provide concise order status information based on the tool result. "
+            "If a tool result contains \"stale\": true, do not read it aloud or mention it — remain silent about that specific result and wait for further input."
         ),
         stt=deepgram.STT(),
         llm=groq.LLM(model="openai/gpt-oss-120b"),
@@ -135,10 +152,13 @@ async def entrypoint(ctx: JobContext):
 
     @session.on("user_input_transcribed")
     def on_user_input_transcribed(ev: UserInputTranscribedEvent):
+        global current_generation
         if ev.is_final and ev.transcript:
+            current_generation += 1
             speaker = ev.speaker_id or "user"
-            logger.info(f"[FINAL Transcript - {speaker}]: {ev.transcript}")
+            logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
+
 
     logger.info("Agent initialized with Deepgram STT + Groq LLM (llama-3.3-70b-versatile) + Rime TTS + lookup_order_tool. Starting session...")
 
