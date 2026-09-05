@@ -1,5 +1,7 @@
 import asyncio
 import logging
+import json
+
 from dotenv import load_dotenv
 
 from livekit import rtc
@@ -7,6 +9,7 @@ from livekit.agents import (
     Agent,
     AgentSession,
     AutoSubscribe,
+    ErrorEvent,
     JobContext,
     UserInputTranscribedEvent,
     WorkerOptions,
@@ -27,6 +30,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger("backend-agent")
 
+import time
+
 # Shared logger instance for backend tool calls
 tool_logger = ToolCallLogger()
 
@@ -38,6 +43,37 @@ active_cancel_tokens: dict[int, CancelToken] = {}
 
 # Active call tracker storing status of pending lookups per generation
 call_tracker: dict[int, dict] = {}
+
+# Reference to active LiveKit Room instance for live data channel events
+current_room: rtc.Room | None = None
+
+
+def emit_continuity_event(event_type: str, **kwargs):
+    """
+    Emits a continuity event:
+    1. Appends structured JSON event to logs/tool_calls.jsonl via tool_logger.
+    2. Publishes JSON event payload over room data channel (topic: 'continuity-events') if room is active.
+    """
+    # Write to persistent JSONL log file
+    tool_logger.log(event=event_type, **kwargs)
+
+    # Publish to live LiveKit room data channel if room active
+    if current_room and current_room.local_participant:
+        payload = {
+            "type": event_type,
+            "ts": time.time(),
+            **kwargs,
+        }
+        try:
+            asyncio.create_task(
+                current_room.local_participant.publish_data(
+                    payload=json.dumps(payload).encode("utf-8"),
+                    topic="continuity-events",
+                    reliable=True,
+                )
+            )
+        except Exception as e:
+            logger.warning(f"Failed to publish data channel event '{event_type}': {e}")
 
 
 @llm.function_tool(
@@ -51,8 +87,11 @@ async def lookup_order_tool(order_id: str) -> dict:
     # Detect if this tool call represents a redirect from an in-flight lookup
     if any(g < captured_gen for g in active_cancel_tokens):
         logger.info(f"[REDIRECT DETECTED] Redirecting to new order_id='{order_id}' | new_gen={captured_gen}")
+        emit_continuity_event("redirect_detected", order_id=order_id, new_generation=captured_gen)
 
     logger.info(f"[TOOL START] order_id='{order_id}' | gen={captured_gen}")
+    emit_continuity_event("tool_call_start", order_id=order_id, generation=captured_gen)
+
     cancel_token = CancelToken()
     active_cancel_tokens[captured_gen] = cancel_token
     call_tracker[captured_gen] = {
@@ -68,8 +107,10 @@ async def lookup_order_tool(order_id: str) -> dict:
             await asyncio.sleep(3.0)
             if captured_gen == current_generation and not cancel_token.is_cancelled():
                 logger.info(f"[PROACTIVE UPDATE] Still checking status for order_id='{order_id}' | gen={captured_gen}")
+                emit_continuity_event("proactive_update", order_id=order_id, generation=captured_gen)
         except asyncio.CancelledError:
             logger.info(f"[PROACTIVE SUPPRESSED] Proactive update suppressed for order_id='{order_id}' | gen={captured_gen}")
+            emit_continuity_event("proactive_suppressed", order_id=order_id, generation=captured_gen)
 
     proactive_task = asyncio.create_task(_proactive_update_worker())
 
@@ -96,9 +137,17 @@ async def lookup_order_tool(order_id: str) -> dict:
         logger.info(
             f"[STALE DISCARDED] order_id='{order_id}' | captured_gen={captured_gen} | current_gen={current_generation} | status={result.status}"
         )
+        emit_continuity_event(
+            "stale_discarded",
+            order_id=order_id,
+            captured_generation=captured_gen,
+            current_generation=current_generation,
+            status=result.status,
+        )
         return {"stale": True, "order_id": order_id}
 
     logger.info(f"[TOOL COMPLETED] order_id='{order_id}' | gen={captured_gen} | status={result.status} | data={result.data}")
+    emit_continuity_event("tool_call_completed", order_id=order_id, generation=captured_gen, status=result.status, data=result.data)
 
     response = {
         "status": result.status,
@@ -112,6 +161,7 @@ async def lookup_order_tool(order_id: str) -> dict:
         logger.info(
             f"[CONSTRAINT RETURNED] Returning lookup result with constraint='{recorded_constraint}' for order_id='{order_id}' | gen={captured_gen}"
         )
+        emit_continuity_event("constraint_returned", order_id=order_id, generation=captured_gen, constraint=recorded_constraint)
         response["constraint"] = recorded_constraint
 
     return response
@@ -126,10 +176,12 @@ async def check_pending_status() -> dict:
     entry = call_tracker.get(current_generation)
     if not entry or entry.get("status") in ("completed", "cancelled"):
         logger.info(f"[STATUS CHECK] No pending lookup in progress | gen={current_generation}")
+        emit_continuity_event("status_check", generation=current_generation, pending=False)
         return {"pending": False, "message": "No order lookup is currently in progress."}
 
     order_id = entry.get("order_id", "unknown")
     logger.info(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' in progress | gen={current_generation}")
+    emit_continuity_event("status_check", order_id=order_id, generation=current_generation, pending=True)
     return {"pending": True, "order_id": order_id, "message": f"Order lookup for {order_id} is still in progress."}
 
 
@@ -151,6 +203,7 @@ async def cancel_pending_lookup() -> dict:
         entry["status"] = "cancelled"
 
     logger.info(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' | gen={current_generation}")
+    emit_continuity_event("cancel_tool", order_id=order_id, generation=current_generation, cancelled=True)
 
     return {"cancelled": True, "order_id": order_id, "message": f"Lookup for order {order_id} has been cancelled."}
 
@@ -170,11 +223,13 @@ async def add_lookup_constraint(constraint: str) -> dict:
 
     if not entry or entry.get("status") != "pending":
         logger.info(f"[CONSTRAINT ADDED] No pending lookup in progress to constrain | gen={current_generation}")
+        emit_continuity_event("constraint_added", generation=current_generation, constraint_recorded=False)
         return {"constraint_recorded": False, "message": "No active order lookup is currently in progress."}
 
     entry["constraint"] = constraint
     order_id = entry.get("order_id", "unknown")
     logger.info(f"[CONSTRAINT ADDED] Recorded constraint='{constraint}' for order_id='{order_id}' | gen={current_generation}")
+    emit_continuity_event("constraint_added", order_id=order_id, generation=current_generation, constraint=constraint)
     return {"constraint_recorded": True, "constraint": constraint, "order_id": order_id}
 
 
@@ -182,6 +237,8 @@ async def add_lookup_constraint(constraint: str) -> dict:
 
 
 async def entrypoint(ctx: JobContext):
+    global current_room
+    current_room = ctx.room
     logger.info(f"Connecting to room: '{ctx.room.name}'...")
     await ctx.connect(auto_subscribe=AutoSubscribe.AUDIO_ONLY)
     logger.info(f"Connected to room: '{ctx.room.name}'")
@@ -220,7 +277,7 @@ async def entrypoint(ctx: JobContext):
             f"Unsubscribed from track '{track.sid}' from participant '{participant.identity}'"
         )
 
-    # Initialize Agent with Deepgram STT, Groq LLM (llama-3.3-70b-versatile), Rime TTS, and intent routing tools
+    # Initialize Agent with Deepgram STT, Groq LLM (openai/gpt-oss-120b), Rime TTS, and intent routing tools
     agent = Agent(
         instructions=(
             "You are an order tracking assistant for DataForge. "
@@ -235,7 +292,15 @@ async def entrypoint(ctx: JobContext):
             "Once a tool result includes a 'constraint' field, answer using ONLY the information relevant to that constraint, not the full order details."
         ),
         stt=deepgram.STT(),
-        llm=groq.LLM(model="openai/gpt-oss-120b"),
+        llm=llm.FallbackAdapter(
+            [
+                groq.LLM(model="openai/gpt-oss-120b"),
+                groq.LLM(model="openai/gpt-oss-20b"),   # see note below
+            ],
+            attempt_timeout=10.0,
+            max_retry_per_llm=1,
+            retry_interval=2,
+        ),
         tts=rime.TTS(
             model="mistv3",
             speaker="peak",
@@ -276,14 +341,29 @@ async def entrypoint(ctx: JobContext):
                 token = active_cancel_tokens.pop(gen, None)
                 if token and not token.is_cancelled():
                     logger.info(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for gen={gen} | current_gen={current_generation}")
+                    emit_continuity_event("cancelled_in_flight", generation=gen, current_generation=current_generation)
                     token.cancel()
 
             logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
+            # Cap history to avoid unbounded token growth across the session
+            agent.update_chat_ctx(agent.chat_ctx.truncate(max_items=20))
+
+    @session.on("error")
+    def on_session_error(ev: ErrorEvent):
+        logger.error(f"[SESSION ERROR] recoverable={ev.recoverable} | {ev.error}")
+        emit_continuity_event("session_error", recoverable=ev.recoverable, error=str(ev.error))
+
+        if not ev.recoverable:
+            # Both FallbackAdapter LLMs (and retries) have been exhausted — speak
+            # a graceful message instead of letting the session close silently.
+            asyncio.create_task(
+                session.say("Sorry, I'm having trouble right now — could you try again in a moment?")
+            )
 
 
 
-    logger.info("Agent initialized with Deepgram STT + Groq LLM (llama-3.3-70b-versatile) + Rime TTS + lookup_order_tool. Starting session...")
+    logger.info("Agent initialized with Deepgram STT + Groq LLM (openai/gpt-oss-120b) + Rime TTS + lookup_order_tool. Starting session...")
 
     await session.start(agent, room=ctx.room)
 

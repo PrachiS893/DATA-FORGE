@@ -103,3 +103,166 @@
 {"event": "completed", "call_id": "9528545f", "generation_id": 19, "order_id": "1023", "ts": 1788623666.653313}
 {"event": "issued", "call_id": "5007914c", "generation_id": 21, "order_id": "0000", "delay_ms": 6000, "ts": 1788623687.3390954}
 {"event": "not_found", "call_id": "5007914c", "generation_id": 21, "order_id": "0000", "ts": 1788623693.3516593}
+{"event": "tool_call_start", "order_id": "1023", "generation": 1, "ts": 1788625571.7139933}
+{"event": "issued", "call_id": "16ce020e", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788625571.7148597}
+{"event": "proactive_update", "order_id": "1023", "generation": 1, "ts": 1788625574.7190537}
+{"event": "completed", "call_id": "16ce020e", "generation_id": 1, "order_id": "1023", "ts": 1788625577.7281108}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 1, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788625577.730312}
+{"event": "tool_call_start", "order_id": "4521", "generation": 2, "ts": 1788625577.73176}
+{"event": "issued", "call_id": "b7d507b1", "generation_id": 2, "order_id": "4521", "delay_ms": 6000, "ts": 1788625577.734252}
+{"event": "proactive_update", "order_id": "4521", "generation": 2, "ts": 1788625580.7421074}
+{"event": "completed", "call_id": "b7d507b1", "generation_id": 2, "order_id": "4521", "ts": 1788625583.7469528}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 2, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788625583.7489605}
+{"event": "tool_call_start", "order_id": "1023", "generation": 3, "ts": 1788625583.751265}
+{"event": "issued", "call_id": "459341ef", "generation_id": 3, "order_id": "1023", "delay_ms": 6000, "ts": 1788625583.7530293}
+{"event": "tool_call_start", "order_id": "4521", "generation": 4, "ts": 1788625584.2576811}
+{"event": "issued", "call_id": "a0c48bdd", "generation_id": 4, "order_id": "4521", "delay_ms": 6000, "ts": 1788625584.2602713}
+{"event": "cancelled", "call_id": "459341ef", "generation_id": 3, "order_id": "1023", "elapsed_ms": 750, "ts": 1788625584.5060956}
+{"event": "stale_discarded", "order_id": "1023", "captured_generation": 3, "current_generation": 4, "status": "cancelled", "ts": 1788625584.5079973}
+{"event": "proactive_suppressed", "order_id": "1023", "generation": 3, "ts": 1788625584.5094888}
+{"event": "proactive_update", "order_id": "4521", "generation": 4, "ts": 1788625587.2616618}
+{"event": "completed", "call_id": "a0c48bdd", "generation_id": 4, "order_id": "4521", "ts": 1788625590.2723722}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 4, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788625590.2734199}
+{"event": "tool_call_start", "order_id": "7788", "generation": 5, "ts": 1788625590.274037}
+{"event": "issued", "call_id": "a23c9b05", "generation_id": 5, "order_id": "7788", "delay_ms": 6000, "ts": 1788625590.2750332}
+{"event": "status_check", "order_id": "7788", "generation": 5, "pending": true, "ts": 1788625590.7748375}
+{"event": "proactive_update", "order_id": "7788", "generation": 5, "ts": 1788625593.2888987}
+{"event": "completed", "call_id": "a23c9b05", "generation_id": 5, "order_id": "7788", "ts": 1788625596.287249}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 5, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788625596.288977}
+{"event": "tool_call_start", "order_id": "1023", "generation": 6, "ts": 1788625596.2906742}
+{"event": "issued", "call_id": "cd64dade", "generation_id": 6, "order_id": "1023", "delay_ms": 6000, "ts": 1788625596.2923102}
+{"event": "cancel_tool", "order_id": "1023", "generation": 6, "cancelled": true, "ts": 1788625596.8000162}
+{"event": "cancelled", "call_id": "cd64dade", "generation_id": 6, "order_id": "1023", "elapsed_ms": 750, "ts": 1788625597.0444884}
+{"event": "stale_discarded", "order_id": "1023", "captured_generation": 6, "current_generation": 6, "status": "cancelled", "ts": 1788625597.0457206}
+{"event": "proactive_suppressed", "order_id": "1023", "generation": 6, "ts": 1788625597.0461497}
+{"event": "tool_call_start", "order_id": "4521", "generation": 7, "ts": 1788625597.0465603}
+{"event": "issued", "call_id": "d9ff4c8f", "generation_id": 7, "order_id": "4521", "delay_ms": 6000, "ts": 1788625597.0469794}
+{"event": "constraint_added", "order_id": "4521", "generation": 7, "constraint": "delivery_date_only", "ts": 1788625597.558887}
+{"event": "proactive_update", "order_id": "4521", "generation": 7, "ts": 1788625600.0546918}
+{"event": "completed", "call_id": "d9ff4c8f", "generation_id": 7, "order_id": "4521", "ts": 1788625603.058044}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 7, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788625603.062669}
+{"event": "constraint_returned", "order_id": "4521", "generation": 7, "constraint": "delivery_date_only", "ts": 1788625603.0648892}
+{"event": "tool_call_start", "order_id": "1023", "generation": 2, "ts": 1788629097.8394318}
+{"event": "issued", "call_id": "f7659e99", "generation_id": 2, "order_id": "1023", "delay_ms": 6000, "ts": 1788629097.841866}
+{"event": "proactive_update", "order_id": "1023", "generation": 2, "ts": 1788629100.843271}
+{"event": "completed", "call_id": "f7659e99", "generation_id": 2, "order_id": "1023", "ts": 1788629103.853473}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 2, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788629103.8575852}
+{"event": "tool_call_start", "order_id": "1023", "generation": 3, "ts": 1788629119.240329}
+{"event": "issued", "call_id": "4e316055", "generation_id": 3, "order_id": "1023", "delay_ms": 6000, "ts": 1788629119.2430801}
+{"event": "proactive_update", "order_id": "1023", "generation": 3, "ts": 1788629122.2463205}
+{"event": "cancelled_in_flight", "generation": 3, "current_generation": 4, "ts": 1788629123.2315927}
+{"event": "cancelled", "call_id": "4e316055", "generation_id": 3, "order_id": "1023", "elapsed_ms": 4000, "ts": 1788629123.2551186}
+{"event": "stale_discarded", "order_id": "1023", "captured_generation": 3, "current_generation": 4, "status": "cancelled", "ts": 1788629123.257152}
+{"event": "tool_call_start", "order_id": "7788", "generation": 5, "ts": 1788629127.073948}
+{"event": "issued", "call_id": "96f43225", "generation_id": 5, "order_id": "7788", "delay_ms": 6000, "ts": 1788629127.0776162}
+{"event": "proactive_update", "order_id": "7788", "generation": 5, "ts": 1788629130.0790653}
+{"event": "completed", "call_id": "96f43225", "generation_id": 5, "order_id": "7788", "ts": 1788629133.097134}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 5, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788629133.103491}
+{"event": "tool_call_start", "order_id": "4521", "generation": 7, "ts": 1788629153.1825452}
+{"event": "issued", "call_id": "1709cb70", "generation_id": 7, "order_id": "4521", "delay_ms": 6000, "ts": 1788629153.184945}
+{"event": "cancelled_in_flight", "generation": 7, "current_generation": 8, "ts": 1788629153.978381}
+{"event": "cancelled", "call_id": "1709cb70", "generation_id": 7, "order_id": "4521", "elapsed_ms": 1000, "ts": 1788629154.187676}
+{"event": "stale_discarded", "order_id": "4521", "captured_generation": 7, "current_generation": 8, "status": "cancelled", "ts": 1788629154.1898925}
+{"event": "proactive_suppressed", "order_id": "4521", "generation": 7, "ts": 1788629154.1919465}
+{"event": "status_check", "generation": 8, "pending": false, "ts": 1788629155.8568935}
+{"event": "cancel_tool", "order_id": "unknown", "generation": 10, "cancelled": true, "ts": 1788629170.7812314}
+{"event": "constraint_added", "generation": 12, "constraint_recorded": false, "ts": 1788629191.0226376}
+{"event": "tool_call_start", "order_id": "1023", "generation": 12, "ts": 1788629191.8569024}
+{"event": "issued", "call_id": "a670bd25", "generation_id": 12, "order_id": "1023", "delay_ms": 6000, "ts": 1788629191.8586717}
+{"event": "proactive_update", "order_id": "1023", "generation": 12, "ts": 1788629194.8600633}
+{"event": "completed", "call_id": "a670bd25", "generation_id": 12, "order_id": "1023", "ts": 1788629197.8699086}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 12, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788629197.8721905}
+{"event": "tool_call_start", "order_id": "1023", "generation": 1, "ts": 1788630171.2475355}
+{"event": "issued", "call_id": "d3761ea3", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788630171.2525623}
+{"event": "proactive_update", "order_id": "1023", "generation": 1, "ts": 1788630174.254668}
+{"event": "completed", "call_id": "d3761ea3", "generation_id": 1, "order_id": "1023", "ts": 1788630177.2692575}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 1, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788630177.2713935}
+{"event": "tool_call_start", "order_id": "7788", "generation": 4, "ts": 1788630197.2280748}
+{"event": "issued", "call_id": "83488093", "generation_id": 4, "order_id": "7788", "delay_ms": 6000, "ts": 1788630197.2317598}
+{"event": "proactive_update", "order_id": "7788", "generation": 4, "ts": 1788630200.2323613}
+{"event": "completed", "call_id": "83488093", "generation_id": 4, "order_id": "7788", "ts": 1788630203.2459326}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 4, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788630203.2491624}
+{"event": "tool_call_start", "order_id": "4521", "generation": 6, "ts": 1788630219.365719}
+{"event": "issued", "call_id": "4d130522", "generation_id": 6, "order_id": "4521", "delay_ms": 6000, "ts": 1788630219.3678875}
+{"event": "proactive_update", "order_id": "4521", "generation": 6, "ts": 1788630222.3701885}
+{"event": "completed", "call_id": "4d130522", "generation_id": 6, "order_id": "4521", "ts": 1788630225.3847604}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 6, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788630225.3888905}
+{"event": "cancel_tool", "order_id": "unknown", "generation": 8, "cancelled": true, "ts": 1788630253.0005696}
+{"event": "constraint_added", "generation": 10, "constraint_recorded": false, "ts": 1788630275.1453815}
+{"event": "tool_call_start", "order_id": "1023", "generation": 10, "ts": 1788630278.0867207}
+{"event": "issued", "call_id": "91db8dff", "generation_id": 10, "order_id": "1023", "delay_ms": 6000, "ts": 1788630278.0896618}
+{"event": "proactive_update", "order_id": "1023", "generation": 10, "ts": 1788630281.0909715}
+{"event": "completed", "call_id": "91db8dff", "generation_id": 10, "order_id": "1023", "ts": 1788630284.103969}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 10, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788630284.1089277}
+{"event": "tool_call_start", "order_id": "7788", "generation": 17, "ts": 1788630388.8913803}
+{"event": "issued", "call_id": "8ec277bf", "generation_id": 17, "order_id": "7788", "delay_ms": 6000, "ts": 1788630388.8928478}
+{"event": "proactive_update", "order_id": "7788", "generation": 17, "ts": 1788630391.894508}
+{"event": "completed", "call_id": "8ec277bf", "generation_id": 17, "order_id": "7788", "ts": 1788630394.9041064}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 17, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788630394.907992}
+{"event": "tool_call_start", "order_id": "1023", "generation": 1, "ts": 1788636387.290883}
+{"event": "issued", "call_id": "6aa3d98b", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788636387.2923024}
+{"event": "proactive_update", "order_id": "1023", "generation": 1, "ts": 1788636390.293066}
+{"event": "completed", "call_id": "6aa3d98b", "generation_id": 1, "order_id": "1023", "ts": 1788636393.326927}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 1, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788636393.3290899}
+{"event": "tool_call_start", "order_id": "7788", "generation": 4, "ts": 1788636414.7718482}
+{"event": "issued", "call_id": "5595987c", "generation_id": 4, "order_id": "7788", "delay_ms": 6000, "ts": 1788636414.773802}
+{"event": "proactive_update", "order_id": "7788", "generation": 4, "ts": 1788636417.7762747}
+{"event": "completed", "call_id": "5595987c", "generation_id": 4, "order_id": "7788", "ts": 1788636420.7933545}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 4, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788636420.7974584}
+{"event": "cancel_tool", "order_id": "unknown", "generation": 7, "cancelled": true, "ts": 1788636439.604992}
+{"event": "tool_call_start", "order_id": "1023", "generation": 8, "ts": 1788636453.1190922}
+{"event": "issued", "call_id": "f3825181", "generation_id": 8, "order_id": "1023", "delay_ms": 6000, "ts": 1788636453.1212308}
+{"event": "cancelled_in_flight", "generation": 8, "current_generation": 9, "ts": 1788636455.188567}
+{"event": "cancelled", "call_id": "f3825181", "generation_id": 8, "order_id": "1023", "elapsed_ms": 2250, "ts": 1788636455.3813047}
+{"event": "stale_discarded", "order_id": "1023", "captured_generation": 8, "current_generation": 9, "status": "cancelled", "ts": 1788636455.3840625}
+{"event": "proactive_suppressed", "order_id": "1023", "generation": 8, "ts": 1788636455.3861039}
+{"event": "constraint_added", "generation": 9, "constraint_recorded": false, "ts": 1788636457.7580817}
+{"event": "tool_call_start", "order_id": "1023", "generation": 9, "ts": 1788636458.6996758}
+{"event": "issued", "call_id": "d30a37db", "generation_id": 9, "order_id": "1023", "delay_ms": 6000, "ts": 1788636458.7008333}
+{"event": "proactive_update", "order_id": "1023", "generation": 9, "ts": 1788636461.7023418}
+{"event": "completed", "call_id": "d30a37db", "generation_id": 9, "order_id": "1023", "ts": 1788636464.712293}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 9, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788636464.714838}
+{"event": "tool_call_start", "order_id": "4521", "generation": 13, "ts": 1788636504.2088974}
+{"event": "issued", "call_id": "e665aa08", "generation_id": 13, "order_id": "4521", "delay_ms": 6000, "ts": 1788636504.211336}
+{"event": "proactive_update", "order_id": "4521", "generation": 13, "ts": 1788636507.2132201}
+{"event": "completed", "call_id": "e665aa08", "generation_id": 13, "order_id": "4521", "ts": 1788636510.2284963}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 13, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788636510.233697}
+{"event": "tool_call_start", "order_id": "7788", "generation": 16, "ts": 1788636534.0435126}
+{"event": "issued", "call_id": "a7499697", "generation_id": 16, "order_id": "7788", "delay_ms": 6000, "ts": 1788636534.0458329}
+{"event": "proactive_update", "order_id": "7788", "generation": 16, "ts": 1788636537.0468462}
+{"event": "completed", "call_id": "a7499697", "generation_id": 16, "order_id": "7788", "ts": 1788636540.0632567}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 16, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788636540.0655966}
+{"event": "cancel_tool", "order_id": "unknown", "generation": 19, "cancelled": true, "ts": 1788636562.717806}
+{"event": "tool_call_start", "order_id": "1023", "generation": 1, "ts": 1788640059.5630162}
+{"event": "issued", "call_id": "545794ff", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788640059.5640216}
+{"event": "proactive_update", "order_id": "1023", "generation": 1, "ts": 1788640062.5656815}
+{"event": "completed", "call_id": "545794ff", "generation_id": 1, "order_id": "1023", "ts": 1788640065.577974}
+{"event": "tool_call_completed", "order_id": "1023", "generation": 1, "status": "completed", "data": {"order_id": "1023", "customer_name": "Aditi Sharma", "status": "shipped", "eta": "2026-09-06", "shipping_address": "12 MG Road, Ranchi, Jharkhand", "total": "\u00e2\u201a\u00b92,499", "items": ["Wireless Earbuds", "Phone Case"]}, "ts": 1788640065.5797527}
+{"event": "tool_call_start", "order_id": "7788", "generation": 3, "ts": 1788640085.5805876}
+{"event": "issued", "call_id": "70773415", "generation_id": 3, "order_id": "7788", "delay_ms": 6000, "ts": 1788640085.582314}
+{"event": "proactive_update", "order_id": "7788", "generation": 3, "ts": 1788640088.5844321}
+{"event": "completed", "call_id": "70773415", "generation_id": 3, "order_id": "7788", "ts": 1788640091.597281}
+{"event": "tool_call_completed", "order_id": "7788", "generation": 3, "status": "completed", "data": {"order_id": "7788", "customer_name": "Neha Kulkarni", "status": "delivered", "eta": "2026-08-30", "shipping_address": "88 FC Road, Pune, Maharashtra", "total": "\u00e2\u201a\u00b91,020", "items": ["Notebook Set", "Pen Drive 64GB"]}, "ts": 1788640091.6004035}
+{"event": "tool_call_start", "order_id": "4521", "generation": 5, "ts": 1788640111.3225713}
+{"event": "issued", "call_id": "5dd4afbe", "generation_id": 5, "order_id": "4521", "delay_ms": 6000, "ts": 1788640111.3238087}
+{"event": "proactive_update", "order_id": "4521", "generation": 5, "ts": 1788640114.3259966}
+{"event": "completed", "call_id": "5dd4afbe", "generation_id": 5, "order_id": "4521", "ts": 1788640117.3359406}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 5, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788640117.3401883}
+{"event": "cancel_tool", "order_id": "unknown", "generation": 8, "cancelled": true, "ts": 1788640139.4072943}
+{"event": "constraint_added", "generation": 10, "constraint_recorded": false, "ts": 1788640154.5405903}
+{"event": "tool_call_start", "order_id": "1023", "generation": 12, "ts": 1788640175.514576}
+{"event": "issued", "call_id": "8fbab73c", "generation_id": 12, "order_id": "1023", "delay_ms": 6000, "ts": 1788640175.517383}
+{"event": "cancelled_in_flight", "generation": 12, "current_generation": 13, "ts": 1788640175.9148345}
+{"event": "cancelled", "call_id": "8fbab73c", "generation_id": 12, "order_id": "1023", "elapsed_ms": 500, "ts": 1788640176.0225523}
+{"event": "stale_discarded", "order_id": "1023", "captured_generation": 12, "current_generation": 13, "status": "cancelled", "ts": 1788640176.0244133}
+{"event": "proactive_suppressed", "order_id": "1023", "generation": 12, "ts": 1788640176.0252595}
+{"event": "tool_call_start", "order_id": "4521", "generation": 13, "ts": 1788640177.71173}
+{"event": "issued", "call_id": "35788819", "generation_id": 13, "order_id": "4521", "delay_ms": 6000, "ts": 1788640177.7135026}
+{"event": "proactive_update", "order_id": "4521", "generation": 13, "ts": 1788640180.7157953}
+{"event": "completed", "call_id": "35788819", "generation_id": 13, "order_id": "4521", "ts": 1788640183.7263477}
+{"event": "tool_call_completed", "order_id": "4521", "generation": 13, "status": "completed", "data": {"order_id": "4521", "customer_name": "Rohan Verma", "status": "processing", "eta": "2026-09-09", "shipping_address": "45 Park Street, Kolkata, West Bengal", "total": "\u00e2\u201a\u00b96,150", "items": ["Bluetooth Speaker"]}, "ts": 1788640183.7314508}
+{"event": "tool_call_start", "order_id": "0000", "generation": 18, "ts": 1788640223.4529219}
+{"event": "issued", "call_id": "1827d3ba", "generation_id": 18, "order_id": "0000", "delay_ms": 6000, "ts": 1788640223.4546971}
+{"event": "proactive_update", "order_id": "0000", "generation": 18, "ts": 1788640226.456343}
+{"event": "not_found", "call_id": "1827d3ba", "generation_id": 18, "order_id": "0000", "ts": 1788640229.471414}
+{"event": "tool_call_completed", "order_id": "0000", "generation": 18, "status": "not_found", "data": {}, "ts": 1788640229.4745119}
