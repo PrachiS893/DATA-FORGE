@@ -47,14 +47,31 @@ async def lookup_order_tool(order_id: str) -> dict:
     """Async wrapper around the blocking lookup_order function from tool.py."""
     global current_generation
     captured_gen = current_generation
-    logger.info(f"[TOOL CALL] Triggered lookup_order_tool for order_id: '{order_id}' (captured_gen={captured_gen})")
+
+    # Detect if this tool call represents a redirect from an in-flight lookup
+    if any(g < captured_gen for g in active_cancel_tokens):
+        logger.info(f"[REDIRECT DETECTED] Redirecting to new order_id='{order_id}' | new_gen={captured_gen}")
+
+    logger.info(f"[TOOL START] order_id='{order_id}' | gen={captured_gen}")
     cancel_token = CancelToken()
     active_cancel_tokens[captured_gen] = cancel_token
     call_tracker[captured_gen] = {
         "order_id": order_id,
         "status": "pending",
         "cancel_token": cancel_token,
+        "constraint": None,
     }
+
+    # Proactive "still checking" status update background task
+    async def _proactive_update_worker():
+        try:
+            await asyncio.sleep(3.0)
+            if captured_gen == current_generation and not cancel_token.is_cancelled():
+                logger.info(f"[PROACTIVE UPDATE] Still checking status for order_id='{order_id}' | gen={captured_gen}")
+        except asyncio.CancelledError:
+            logger.info(f"[PROACTIVE SUPPRESSED] Proactive update suppressed for order_id='{order_id}' | gen={captured_gen}")
+
+    proactive_task = asyncio.create_task(_proactive_update_worker())
 
     try:
         # Run blocking synchronous lookup_order in background thread to avoid freezing event loop
@@ -66,6 +83,9 @@ async def lookup_order_tool(order_id: str) -> dict:
             logger=tool_logger,
         )
     finally:
+        # Cancel proactive task once lookup returns or bails out
+        if not proactive_task.done():
+            proactive_task.cancel()
         # Clean up mapping entry once call completes or bails out
         active_cancel_tokens.pop(captured_gen, None)
         if captured_gen in call_tracker:
@@ -74,22 +94,27 @@ async def lookup_order_tool(order_id: str) -> dict:
     # Stale-result fencing check: compare captured generation against current generation or check cancellation status
     if captured_gen != current_generation or result.status == "cancelled":
         logger.info(
-            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation} status={result.status}"
-        )
-        print(
-            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation} status={result.status}",
-            flush=True,
+            f"[STALE DISCARDED] order_id='{order_id}' | captured_gen={captured_gen} | current_gen={current_generation} | status={result.status}"
         )
         return {"stale": True, "order_id": order_id}
 
-    logger.info(f"[TOOL RESULT] order_id={order_id} | status={result.status} | data={result.data}")
-    print(f"[TOOL RESULT] order_id={order_id} | status={result.status} | data={result.data}", flush=True)
+    logger.info(f"[TOOL COMPLETED] order_id='{order_id}' | gen={captured_gen} | status={result.status} | data={result.data}")
 
-    return {
+    response = {
         "status": result.status,
         "order_id": result.order_id,
         "data": result.data,
     }
+
+    # Include recorded constraint if present for this generation
+    recorded_constraint = call_tracker.get(captured_gen, {}).get("constraint")
+    if recorded_constraint:
+        logger.info(
+            f"[CONSTRAINT RETURNED] Returning lookup result with constraint='{recorded_constraint}' for order_id='{order_id}' | gen={captured_gen}"
+        )
+        response["constraint"] = recorded_constraint
+
+    return response
 
 
 @llm.function_tool(
@@ -100,13 +125,11 @@ async def check_pending_status() -> dict:
     global current_generation
     entry = call_tracker.get(current_generation)
     if not entry or entry.get("status") in ("completed", "cancelled"):
-        logger.info("[STATUS CHECK] No pending lookup for current generation")
-        print("[STATUS CHECK] No pending lookup for current generation", flush=True)
+        logger.info(f"[STATUS CHECK] No pending lookup in progress | gen={current_generation}")
         return {"pending": False, "message": "No order lookup is currently in progress."}
 
     order_id = entry.get("order_id", "unknown")
-    logger.info(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' is still in progress (gen={current_generation})")
-    print(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' is still in progress (gen={current_generation})", flush=True)
+    logger.info(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' in progress | gen={current_generation}")
     return {"pending": True, "order_id": order_id, "message": f"Order lookup for {order_id} is still in progress."}
 
 
@@ -127,10 +150,32 @@ async def cancel_pending_lookup() -> dict:
     if entry:
         entry["status"] = "cancelled"
 
-    logger.info(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' (gen={current_generation})")
-    print(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' (gen={current_generation})", flush=True)
+    logger.info(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' | gen={current_generation}")
 
     return {"cancelled": True, "order_id": order_id, "message": f"Lookup for order {order_id} has been cancelled."}
+
+
+@llm.function_tool(
+    description="Add a constraint or filter to the currently pending order lookup (e.g. when the user asks to narrow the request for the SAME order, such as 'just tell me the delivery date', 'only check if it shipped', or 'just the items'). Do NOT use for a different order ID, checking status, or cancelling."
+)
+async def add_lookup_constraint(constraint: str) -> dict:
+    """Record a constraint or field filter for the currently pending order lookup."""
+    global current_generation
+    entry = call_tracker.get(current_generation)
+    if not entry or entry.get("status") != "pending":
+        for gen, tracker_entry in sorted(call_tracker.items(), reverse=True):
+            if tracker_entry.get("status") == "pending":
+                entry = tracker_entry
+                break
+
+    if not entry or entry.get("status") != "pending":
+        logger.info(f"[CONSTRAINT ADDED] No pending lookup in progress to constrain | gen={current_generation}")
+        return {"constraint_recorded": False, "message": "No active order lookup is currently in progress."}
+
+    entry["constraint"] = constraint
+    order_id = entry.get("order_id", "unknown")
+    logger.info(f"[CONSTRAINT ADDED] Recorded constraint='{constraint}' for order_id='{order_id}' | gen={current_generation}")
+    return {"constraint_recorded": True, "constraint": constraint, "order_id": order_id}
 
 
 
@@ -185,7 +230,9 @@ async def entrypoint(ctx: JobContext):
             "When an order lookup is pending: "
             "(a) If the user asks about a DIFFERENT order ID, call lookup_order_tool with the new order ID as normal. "
             "(b) If the user asks whether the current lookup is done or how long it will take, call check_pending_status instead of calling lookup_order_tool again. "
-            "(c) If the user indicates they want to cancel, stop, or say 'never mind', call cancel_pending_lookup instead of calling lookup_order_tool."
+            "(c) If the user indicates they want to cancel, stop, or say 'never mind', call cancel_pending_lookup instead of calling lookup_order_tool. "
+            "(d) If the user asks to narrow, filter, or refine what specific details they want to hear about the CURRENT order being looked up (e.g. 'just the delivery date', 'only tell me if it shipped', 'just the total'), call add_lookup_constraint with a short description of what they want, and continue waiting — do not call lookup_order_tool again. "
+            "Once a tool result includes a 'constraint' field, answer using ONLY the information relevant to that constraint, not the full order details."
         ),
         stt=deepgram.STT(),
         llm=groq.LLM(model="openai/gpt-oss-120b"),
@@ -197,7 +244,7 @@ async def entrypoint(ctx: JobContext):
             use_websocket=True,
             segment="bySentence",
         ),
-        tools=[lookup_order_tool, check_pending_status, cancel_pending_lookup],
+        tools=[lookup_order_tool, check_pending_status, cancel_pending_lookup, add_lookup_constraint],
     )
 
 
@@ -228,8 +275,7 @@ async def entrypoint(ctx: JobContext):
             for gen in stale_gens:
                 token = active_cancel_tokens.pop(gen, None)
                 if token and not token.is_cancelled():
-                    logger.info(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for generation {gen}")
-                    print(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for generation {gen}", flush=True)
+                    logger.info(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for gen={gen} | current_gen={current_generation}")
                     token.cancel()
 
             logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
