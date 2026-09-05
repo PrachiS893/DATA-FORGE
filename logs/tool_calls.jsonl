@@ -33,3 +33,21 @@
 {"event": "not_found", "call_id": "4730083d", "generation_id": 3, "order_id": "103", "ts": 1788618385.565679}
 {"event": "issued", "call_id": "11c57cd9", "generation_id": 3, "order_id": "7788", "delay_ms": 6000, "ts": 1788618386.614373}
 {"event": "completed", "call_id": "11c57cd9", "generation_id": 3, "order_id": "7788", "ts": 1788618392.6246676}
+{"event": "issued", "call_id": "2dcf3930", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788618854.738358}
+{"event": "completed", "call_id": "2dcf3930", "generation_id": 1, "order_id": "1023", "ts": 1788618860.7509937}
+{"event": "issued", "call_id": "71d6dfa6", "generation_id": 2, "order_id": "4521", "delay_ms": 6000, "ts": 1788618860.75314}
+{"event": "completed", "call_id": "71d6dfa6", "generation_id": 2, "order_id": "4521", "ts": 1788618866.7647743}
+{"event": "issued", "call_id": "f150b454", "generation_id": 3, "order_id": "7788", "delay_ms": 6000, "ts": 1788618866.7678347}
+{"event": "cancelled", "call_id": "f150b454", "generation_id": 3, "order_id": "7788", "elapsed_ms": 750, "ts": 1788618867.5203218}
+{"event": "issued", "call_id": "8795930d", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788618883.7928846}
+{"event": "completed", "call_id": "8795930d", "generation_id": 1, "order_id": "1023", "ts": 1788618889.8083477}
+{"event": "issued", "call_id": "b6c30422", "generation_id": 2, "order_id": "4521", "delay_ms": 6000, "ts": 1788618889.8106825}
+{"event": "completed", "call_id": "b6c30422", "generation_id": 2, "order_id": "4521", "ts": 1788618895.820576}
+{"event": "issued", "call_id": "1ec1a763", "generation_id": 3, "order_id": "7788", "delay_ms": 6000, "ts": 1788618895.8247266}
+{"event": "cancelled", "call_id": "1ec1a763", "generation_id": 3, "order_id": "7788", "elapsed_ms": 750, "ts": 1788618896.5788493}
+{"event": "issued", "call_id": "0f9d9f8e", "generation_id": 4, "order_id": "4521", "delay_ms": 6000, "ts": 1788619097.2343729}
+{"event": "cancelled", "call_id": "0f9d9f8e", "generation_id": 4, "order_id": "4521", "elapsed_ms": 1250, "ts": 1788619098.4884276}
+{"event": "issued", "call_id": "2a30d30d", "generation_id": 8, "order_id": "4521", "delay_ms": 6000, "ts": 1788619132.4235828}
+{"event": "completed", "call_id": "2a30d30d", "generation_id": 8, "order_id": "4521", "ts": 1788619138.4379592}
+{"event": "issued", "call_id": "ae2d6ab1", "generation_id": 12, "order_id": "9981", "delay_ms": 6000, "ts": 1788619168.7714765}
+{"event": "completed", "call_id": "ae2d6ab1", "generation_id": 12, "order_id": "9981", "ts": 1788619174.786851}

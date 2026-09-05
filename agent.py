@@ -36,6 +36,9 @@ current_generation: int = 0
 # Mapping from generation ID to its active CancelToken
 active_cancel_tokens: dict[int, CancelToken] = {}
 
+# Active call tracker storing status of pending lookups per generation
+call_tracker: dict[int, dict] = {}
+
 
 @llm.function_tool(
     description="Look up order details (status, ETA, items, total, shipping address) by numeric order ID (e.g. '1023', '4521')."
@@ -47,6 +50,11 @@ async def lookup_order_tool(order_id: str) -> dict:
     logger.info(f"[TOOL CALL] Triggered lookup_order_tool for order_id: '{order_id}' (captured_gen={captured_gen})")
     cancel_token = CancelToken()
     active_cancel_tokens[captured_gen] = cancel_token
+    call_tracker[captured_gen] = {
+        "order_id": order_id,
+        "status": "pending",
+        "cancel_token": cancel_token,
+    }
 
     try:
         # Run blocking synchronous lookup_order in background thread to avoid freezing event loop
@@ -60,6 +68,8 @@ async def lookup_order_tool(order_id: str) -> dict:
     finally:
         # Clean up mapping entry once call completes or bails out
         active_cancel_tokens.pop(captured_gen, None)
+        if captured_gen in call_tracker:
+            call_tracker[captured_gen]["status"] = result.status if 'result' in locals() else "completed"
 
     # Stale-result fencing check: compare captured generation against current generation or check cancellation status
     if captured_gen != current_generation or result.status == "cancelled":
@@ -80,6 +90,48 @@ async def lookup_order_tool(order_id: str) -> dict:
         "order_id": result.order_id,
         "data": result.data,
     }
+
+
+@llm.function_tool(
+    description="Check the progress or status of a currently pending order lookup (e.g. when the user asks 'is it done yet?', 'did you find it?', or 'how much longer?')."
+)
+async def check_pending_status() -> dict:
+    """Check the status of the current pending order lookup without issuing a new search."""
+    global current_generation
+    entry = call_tracker.get(current_generation)
+    if not entry or entry.get("status") in ("completed", "cancelled"):
+        logger.info("[STATUS CHECK] No pending lookup for current generation")
+        print("[STATUS CHECK] No pending lookup for current generation", flush=True)
+        return {"pending": False, "message": "No order lookup is currently in progress."}
+
+    order_id = entry.get("order_id", "unknown")
+    logger.info(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' is still in progress (gen={current_generation})")
+    print(f"[STATUS CHECK] Pending lookup for order_id='{order_id}' is still in progress (gen={current_generation})", flush=True)
+    return {"pending": True, "order_id": order_id, "message": f"Order lookup for {order_id} is still in progress."}
+
+
+@llm.function_tool(
+    description="Cancel or abort the currently in-flight order lookup when the user says 'cancel', 'never mind', 'stop', or 'forget it'."
+)
+async def cancel_pending_lookup() -> dict:
+    """Cancel the currently pending order lookup."""
+    global current_generation
+    entry = call_tracker.get(current_generation)
+    captured_token = active_cancel_tokens.pop(current_generation, None)
+
+    order_id = entry.get("order_id", "unknown") if entry else "unknown"
+
+    if captured_token and not captured_token.is_cancelled():
+        captured_token.cancel()
+
+    if entry:
+        entry["status"] = "cancelled"
+
+    logger.info(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' (gen={current_generation})")
+    print(f"[CANCEL TOOL] Cancelled pending lookup for order_id='{order_id}' (gen={current_generation})", flush=True)
+
+    return {"cancelled": True, "order_id": order_id, "message": f"Lookup for order {order_id} has been cancelled."}
+
 
 
 
@@ -123,13 +175,17 @@ async def entrypoint(ctx: JobContext):
             f"Unsubscribed from track '{track.sid}' from participant '{participant.identity}'"
         )
 
-    # Initialize Agent with Deepgram STT, Groq LLM (llama-3.3-70b-versatile), Rime TTS, and lookup_order_tool
+    # Initialize Agent with Deepgram STT, Groq LLM (llama-3.3-70b-versatile), Rime TTS, and intent routing tools
     agent = Agent(
         instructions=(
             "You are an order tracking assistant for DataForge. "
             "When a user asks about an order or provides an order ID, call the tool lookup_order_tool with the order ID. "
             "Provide concise order status information based on the tool result. "
-            "If a tool result contains \"stale\": true, do not read it aloud or mention it — remain silent about that specific result and wait for further input."
+            "If a tool result contains \"stale\": true, do not read it aloud or mention it — remain silent about that specific result and wait for further input. "
+            "When an order lookup is pending: "
+            "(a) If the user asks about a DIFFERENT order ID, call lookup_order_tool with the new order ID as normal. "
+            "(b) If the user asks whether the current lookup is done or how long it will take, call check_pending_status instead of calling lookup_order_tool again. "
+            "(c) If the user indicates they want to cancel, stop, or say 'never mind', call cancel_pending_lookup instead of calling lookup_order_tool."
         ),
         stt=deepgram.STT(),
         llm=groq.LLM(model="openai/gpt-oss-120b"),
@@ -141,8 +197,9 @@ async def entrypoint(ctx: JobContext):
             use_websocket=True,
             segment="bySentence",
         ),
-        tools=[lookup_order_tool],
+        tools=[lookup_order_tool, check_pending_status, cancel_pending_lookup],
     )
+
 
 
     from livekit.agents import TurnHandlingOptions
