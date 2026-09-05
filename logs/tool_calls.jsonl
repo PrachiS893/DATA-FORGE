@@ -23,3 +23,13 @@
 {"event": "completed", "call_id": "cda78bb2", "generation_id": 4, "order_id": "7788", "ts": 1788615709.197276}
 {"event": "issued", "call_id": "c439d291", "generation_id": 4, "order_id": "7788", "delay_ms": 6000, "ts": 1788616075.5287127}
 {"event": "completed", "call_id": "c439d291", "generation_id": 4, "order_id": "7788", "ts": 1788616081.5393703}
+{"event": "issued", "call_id": "a2dbfd30", "generation_id": 1, "order_id": "1023", "delay_ms": 6000, "ts": 1788618158.808334}
+{"event": "cancelled", "call_id": "a2dbfd30", "generation_id": 1, "order_id": "1023", "elapsed_ms": 500, "ts": 1788618159.3105915}
+{"event": "issued", "call_id": "dee1d345", "generation_id": 2, "order_id": "7788", "delay_ms": 6000, "ts": 1788618159.311129}
+{"event": "completed", "call_id": "dee1d345", "generation_id": 2, "order_id": "7788", "ts": 1788618165.3245544}
+{"event": "issued", "call_id": "b0d63a93", "generation_id": 0, "order_id": "1023", "delay_ms": 6000, "ts": 1788618199.668479}
+{"event": "completed", "call_id": "b0d63a93", "generation_id": 0, "order_id": "1023", "ts": 1788618205.6796393}
+{"event": "issued", "call_id": "4730083d", "generation_id": 3, "order_id": "103", "delay_ms": 6000, "ts": 1788618379.5556397}
+{"event": "not_found", "call_id": "4730083d", "generation_id": 3, "order_id": "103", "ts": 1788618385.565679}
+{"event": "issued", "call_id": "11c57cd9", "generation_id": 3, "order_id": "7788", "delay_ms": 6000, "ts": 1788618386.614373}
+{"event": "completed", "call_id": "11c57cd9", "generation_id": 3, "order_id": "7788", "ts": 1788618392.6246676}

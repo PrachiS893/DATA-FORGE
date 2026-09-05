@@ -33,6 +33,9 @@ tool_logger = ToolCallLogger()
 # Global generation counter, bumped on every committed user instruction
 current_generation: int = 0
 
+# Mapping from generation ID to its active CancelToken
+active_cancel_tokens: dict[int, CancelToken] = {}
+
 
 @llm.function_tool(
     description="Look up order details (status, ETA, items, total, shipping address) by numeric order ID (e.g. '1023', '4521')."
@@ -43,23 +46,28 @@ async def lookup_order_tool(order_id: str) -> dict:
     captured_gen = current_generation
     logger.info(f"[TOOL CALL] Triggered lookup_order_tool for order_id: '{order_id}' (captured_gen={captured_gen})")
     cancel_token = CancelToken()
+    active_cancel_tokens[captured_gen] = cancel_token
 
-    # Run blocking synchronous lookup_order in background thread to avoid freezing event loop
-    result = await asyncio.to_thread(
-        lookup_order,
-        order_id=order_id,
-        generation_id=captured_gen,
-        cancel_token=cancel_token,
-        logger=tool_logger,
-    )
+    try:
+        # Run blocking synchronous lookup_order in background thread to avoid freezing event loop
+        result = await asyncio.to_thread(
+            lookup_order,
+            order_id=order_id,
+            generation_id=captured_gen,
+            cancel_token=cancel_token,
+            logger=tool_logger,
+        )
+    finally:
+        # Clean up mapping entry once call completes or bails out
+        active_cancel_tokens.pop(captured_gen, None)
 
-    # Stale-result fencing check: compare captured generation against current generation
-    if captured_gen != current_generation:
+    # Stale-result fencing check: compare captured generation against current generation or check cancellation status
+    if captured_gen != current_generation or result.status == "cancelled":
         logger.info(
-            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation}"
+            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation} status={result.status}"
         )
         print(
-            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation}",
+            f"[STALE DISCARDED] order_id={order_id} captured_gen={captured_gen} current_gen={current_generation} status={result.status}",
             flush=True,
         )
         return {"stale": True, "order_id": order_id}
@@ -72,6 +80,7 @@ async def lookup_order_tool(order_id: str) -> dict:
         "order_id": result.order_id,
         "data": result.data,
     }
+
 
 
 
@@ -156,8 +165,19 @@ async def entrypoint(ctx: JobContext):
         if ev.is_final and ev.transcript:
             current_generation += 1
             speaker = ev.speaker_id or "user"
+
+            # Actively cancel any in-flight lookups from older generations
+            stale_gens = [g for g in active_cancel_tokens if g < current_generation]
+            for gen in stale_gens:
+                token = active_cancel_tokens.pop(gen, None)
+                if token and not token.is_cancelled():
+                    logger.info(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for generation {gen}")
+                    print(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for generation {gen}", flush=True)
+                    token.cancel()
+
             logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
+
 
 
     logger.info("Agent initialized with Deepgram STT + Groq LLM (llama-3.3-70b-versatile) + Rime TTS + lookup_order_tool. Starting session...")

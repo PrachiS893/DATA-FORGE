@@ -16,9 +16,11 @@ This repository contains the LiveKit Python Agent for DataForge voice assistant.
   - **Segment**: `"bySentence"`
 - **BE-6a Continuity Engine (Generation Counter & Stale Fencing)**:
   - Global `current_generation` counter incremented on every committed user instruction (`ev.is_final`).
-  - `lookup_order_tool` captures `captured_gen` when invoked and passes it to `lookup_order`.
   - Stale-result fencing compares `captured_gen` against `current_generation` after lookup returns. Discards stale results with log `[STALE DISCARDED]` and returns `{"stale": True, "order_id": order_id}`.
-  - Model instructions updated so LLM remains silent on stale results.
+- **BE-6b Continuity Engine (Active Cancellation Wiring)**:
+  - Maintained `active_cancel_tokens: dict[int, CancelToken]` mapping in `agent.py`.
+  - When a new turn is committed (`ev.is_final` in `on_user_input_transcribed`), iterates over older generation tokens (`gen < current_generation`) and triggers `.cancel()`.
+  - In-flight lookups in `tool.py` detect `cancel_token.is_cancelled()` within 250ms and return early with `status="cancelled"`.
 
 ## Setup Instructions
 
