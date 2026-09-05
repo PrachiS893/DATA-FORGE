@@ -14,8 +14,10 @@ from livekit.agents import (
     llm,
     stt,
 )
-from livekit.plugins import deepgram, google
+from livekit.plugins import deepgram, groq, rime
 from tool import CancelToken, ToolCallLogger, lookup_order
+
+
 
 load_dotenv()
 
@@ -96,7 +98,7 @@ async def entrypoint(ctx: JobContext):
             f"Unsubscribed from track '{track.sid}' from participant '{participant.identity}'"
         )
 
-    # Initialize Agent with Deepgram STT, Google Gemini LLM, and lookup_order_tool
+    # Initialize Agent with Deepgram STT, Groq LLM (llama-3.3-70b-versatile), Rime TTS, and lookup_order_tool
     agent = Agent(
         instructions=(
             "You are an order tracking assistant for DataForge. "
@@ -104,11 +106,32 @@ async def entrypoint(ctx: JobContext):
             "Provide concise order status information based on the tool result."
         ),
         stt=deepgram.STT(),
-        llm=google.LLM(model="gemini-3.6-flash"),
+        llm=groq.LLM(model="openai/gpt-oss-120b"),
+        tts=rime.TTS(
+            model="mistv3",
+            speaker="peak",
+            sample_rate=16000,
+            speed_alpha=1.0,
+            use_websocket=True,
+            segment="bySentence",
+        ),
         tools=[lookup_order_tool],
     )
 
-    session = AgentSession()
+
+    from livekit.agents import TurnHandlingOptions
+
+    session = AgentSession(
+        turn_handling=TurnHandlingOptions(
+            turn_detection="stt",
+            endpointing={
+               "mode": "fixed",
+                "min_delay": 1.0,   # up from the 0.5s default — cuts down on transcript-arrives-late double commits
+                "max_delay": 3.0,
+            },
+        ),
+    )
+
 
     @session.on("user_input_transcribed")
     def on_user_input_transcribed(ev: UserInputTranscribedEvent):
@@ -117,7 +140,8 @@ async def entrypoint(ctx: JobContext):
             logger.info(f"[FINAL Transcript - {speaker}]: {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
 
-    logger.info("BE-3 Agent initialized with Deepgram STT + Gemini LLM + lookup_order_tool. Starting session...")
+    logger.info("Agent initialized with Deepgram STT + Groq LLM (llama-3.3-70b-versatile) + Rime TTS + lookup_order_tool. Starting session...")
+
     await session.start(agent, room=ctx.room)
 
 
