@@ -104,7 +104,7 @@ async def lookup_order_tool(order_id: str) -> dict:
     # Proactive "still checking" status update background task
     async def _proactive_update_worker():
         try:
-            await asyncio.sleep(3.0)
+            await asyncio.sleep(1.0)
             if captured_gen == current_generation and not cancel_token.is_cancelled():
                 logger.info(f"[PROACTIVE UPDATE] Still checking status for order_id='{order_id}' | gen={captured_gen}")
                 emit_continuity_event("proactive_update", order_id=order_id, generation=captured_gen)
@@ -347,16 +347,19 @@ async def entrypoint(ctx: JobContext):
             logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
             # Cap history to avoid unbounded token growth across the session
-            agent.update_chat_ctx(agent.chat_ctx.truncate(max_items=20))
+            new_ctx = agent.chat_ctx.copy()
+            new_ctx.truncate(max_items=20)
+            asyncio.create_task(agent.update_chat_ctx(new_ctx))
 
     @session.on("error")
     def on_session_error(ev: ErrorEvent):
-        logger.error(f"[SESSION ERROR] recoverable={ev.recoverable} | {ev.error}")
-        emit_continuity_event("session_error", recoverable=ev.recoverable, error=str(ev.error))
+        recoverable = getattr(ev.error, "recoverable", True)
+        logger.error(f"[SESSION ERROR] recoverable={recoverable} | {ev.error}")
+        emit_continuity_event("session_error", recoverable=recoverable, error=str(ev.error))
 
-        if not ev.recoverable:
+        if not recoverable:
             # Both FallbackAdapter LLMs (and retries) have been exhausted — speak
-            # a graceful message instead of letting the session close silently.
+            # a graceful fallback message instead of letting the session close silently.
             asyncio.create_task(
                 session.say("Sorry, I'm having trouble right now — could you try again in a moment?")
             )

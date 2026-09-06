@@ -31,7 +31,7 @@ LOG_PATH = Path(__file__).parent / "logs" / "tool_calls.jsonl"
 # How long the mock backend takes to "look something up".
 # Override with an env var so you can dial this up/down for the stress test
 # without touching code — the PS explicitly asks for a fixed, controllable delay.
-TOOL_DELAY_MS = int(os.environ.get("TOOL_DELAY_MS", "6000"))
+TOOL_DELAY_MS = int(os.environ.get("TOOL_DELAY_MS", "3500"))
 
 # How often (in ms) the lookup checks whether it's been cancelled while
 # "working". Smaller = faster interrupt reaction, at the cost of more
