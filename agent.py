@@ -360,9 +360,7 @@ async def entrypoint(ctx: JobContext):
         if not recoverable:
             # Both FallbackAdapter LLMs (and retries) have been exhausted — speak
             # a graceful fallback message instead of letting the session close silently.
-            asyncio.create_task(
-                session.say("Sorry, I'm having trouble right now — could you try again in a moment?")
-            )
+            session.say("Sorry, I'm having trouble right now — could you try again in a moment?")
 
 
 
