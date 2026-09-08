@@ -41,11 +41,35 @@ current_generation: int = 0
 # Mapping from generation ID to its active CancelToken
 active_cancel_tokens: dict[int, CancelToken] = {}
 
+# Mapping from generation ID to its active SpeechHandles
+active_speech_handles: dict[int, list] = {}
+
 # Active call tracker storing status of pending lookups per generation
 call_tracker: dict[int, dict] = {}
 
 # Reference to active LiveKit Room instance for live data channel events
 current_room: rtc.Room | None = None
+
+
+def cancel_stale_speech(target_gen: int) -> bool:
+    """Cancels and discards any speech handles created for generations older than target_gen.
+    Returns True if any stale speech handles were found and discarded, False otherwise."""
+    stale_speech_gens = [g for g in active_speech_handles if g < target_gen]
+    discarded = False
+    for gen in stale_speech_gens:
+        handles = active_speech_handles.pop(gen, [])
+        for handle in handles:
+            if not handle.done():
+                try:
+                    handle.interrupt(force=True)
+                    handle._mark_done()
+                except Exception as e:
+                    logger.warning(f"Error interrupting stale speech handle for gen={gen}: {e}")
+                logger.info(f"[STALE SPEECH DISCARDED] captured_gen={gen} | current_gen={target_gen}")
+                emit_continuity_event("stale_speech_discarded", captured_generation=gen, current_generation=target_gen)
+                discarded = True
+    return discarded
+
 
 
 def emit_continuity_event(event_type: str, **kwargs):
@@ -88,6 +112,9 @@ async def lookup_order_tool(order_id: str) -> dict:
     if any(g < captured_gen for g in active_cancel_tokens):
         logger.info(f"[REDIRECT DETECTED] Redirecting to new order_id='{order_id}' | new_gen={captured_gen}")
         emit_continuity_event("redirect_detected", order_id=order_id, new_generation=captured_gen)
+
+    # Cancel any stale speech handles from older generations
+    cancel_stale_speech(captured_gen)
 
     logger.info(f"[TOOL START] order_id='{order_id}' | gen={captured_gen}")
     emit_continuity_event("tool_call_start", order_id=order_id, generation=captured_gen)
@@ -327,6 +354,11 @@ async def entrypoint(ctx: JobContext):
         ),
     )
 
+    @session.on("speech_created")
+    def on_speech_created(ev):
+        global current_generation
+        handles = active_speech_handles.setdefault(current_generation, [])
+        handles.append(ev.speech_handle)
 
     @session.on("user_input_transcribed")
     def on_user_input_transcribed(ev: UserInputTranscribedEvent):
@@ -343,6 +375,13 @@ async def entrypoint(ctx: JobContext):
                     logger.info(f"[CANCELLED IN-FLIGHT] Cancelling in-flight lookup for gen={gen} | current_gen={current_generation}")
                     emit_continuity_event("cancelled_in_flight", generation=gen, current_generation=current_generation)
                     token.cancel()
+
+            # Actively cancel/discard any stale speech handles from older generations
+            if cancel_stale_speech(current_generation):
+                try:
+                    session.interrupt(force=True)
+                except Exception as e:
+                    logger.warning(f"Error interrupting session speech: {e}")
 
             logger.info(f"[FINAL Transcript - {speaker}] (gen={current_generation}): {ev.transcript}")
             print(f"[{speaker}]: {ev.transcript}", flush=True)
