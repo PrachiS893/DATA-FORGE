@@ -3,16 +3,21 @@ import uuid
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from livekit import api
 from dotenv import load_dotenv
 
 
-# Load environment variables
+# ---------------------------------------------
+# LOAD ENVIRONMENT VARIABLES
+# ---------------------------------------------
+
 load_dotenv()
 
 
-# Create FastAPI app
+# ---------------------------------------------
+# CREATE FASTAPI APP
+# ---------------------------------------------
+
 app = FastAPI()
 
 
@@ -22,9 +27,9 @@ print(
 )
 
 
-# ------------------------------------------------
-# CORS
-# ------------------------------------------------
+# ---------------------------------------------
+# CORS CONFIGURATION
+# ---------------------------------------------
 
 app.add_middleware(
     CORSMiddleware,
@@ -42,9 +47,9 @@ app.add_middleware(
 )
 
 
-# ------------------------------------------------
-# LIVEKIT TOKEN
-# ------------------------------------------------
+# ---------------------------------------------
+# LIVEKIT TOKEN ENDPOINT
+# ---------------------------------------------
 
 @app.get("/api/token")
 def get_token():
